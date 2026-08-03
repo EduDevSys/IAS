@@ -11,6 +11,8 @@
   const FLUJOIA_KEY = 'flujoia_state_v1';
   const root = document.getElementById('app');
   const toastEl = document.getElementById('toast');
+  const modalEl = document.getElementById('aiModal');
+  const modalTextEl = document.getElementById('modalText');
 
   // -------------------------------------------------------
   // Estado
@@ -22,7 +24,7 @@
       step1Index: 0,
       links: [],              // { url, analysisIndex, done }
       currentLinkIndex: 0,
-      darkMode: window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches,
+      darkMode: false, // la app inicia siempre en modo claro por defecto
       soundOn: true,
       timerOn: false,
       timerStart: null,       // epoch ms cuando se reanudó
@@ -137,6 +139,35 @@
     document.head.appendChild(style);
   })();
 
+  // -------------------------------------------------------
+  // Modal "Ir a la IA"
+  // -------------------------------------------------------
+  let modalTargetLink = null;
+
+  function openAiModal(member) {
+    if (!member) return;
+    modalTextEl.textContent = `Pégalo en ${member.ai} y espera la respuesta. Cuando termines, regresa a esta pestaña para continuar con los demás prompts.`;
+    modalTargetLink = member.link;
+    modalEl.hidden = false;
+  }
+
+  function closeAiModal() {
+    modalEl.hidden = true;
+    modalTargetLink = null;
+  }
+
+  modalEl.addEventListener('click', (e) => {
+    if (e.target === modalEl) { closeAiModal(); return; } // clic en el fondo
+    const el = e.target.closest('[data-action]');
+    if (!el) return;
+    if (el.dataset.action === 'modal-close') {
+      closeAiModal();
+    } else if (el.dataset.action === 'modal-go') {
+      if (modalTargetLink) window.open(modalTargetLink, '_blank', 'noopener');
+      closeAiModal();
+    }
+  });
+
   async function copyText(text, btn) {
     let ok = false;
     try {
@@ -165,6 +196,7 @@
           setTimeout(() => flag.classList.remove('show'), 1800);
         }
       }
+      openAiModal(getMember());
     } else {
       showToast('No se pudo copiar. Selecciona el texto manualmente.', '⚠️');
     }

@@ -9,13 +9,14 @@
 // Los colores se eligieron con contraste suficiente para texto blanco encima
 // (ver textColorFor() en app.js, que además calcula el color de texto por
 // si algún color se cambia en el futuro y queda demasiado claro).
+// `link` es la URL a la que se manda al usuario cuando quiere "Ir a la IA".
 const MEMBERS = [
-  { id: 'chris',    name: 'Chris',              ai: 'ChatGPT',     icon: '✦', color: '#0E8F6E' },
-  { id: 'leo',      name: 'Leo',                ai: 'Gemini',      icon: '◆', color: '#7C3AED' },
-  { id: 'juanz',    name: 'Juan Z',             ai: 'Copilot',     icon: '▲', color: '#0369A1' },
-  { id: 'virginio', name: 'Virginio',           ai: 'Meta AI',     icon: '●', color: '#15803D' },
-  { id: 'eduardo',  name: 'Eduardo',            ai: 'Perplexity',  icon: '■', color: '#B45309' },
-  { id: 'eva',      name: 'Eva / Jovani Calvo', ai: 'Grok',        icon: '★', color: '#111827' },
+  { id: 'chris',    name: 'Chris',              ai: 'ChatGPT',     icon: '✦', color: '#0E8F6E', link: 'https://chatgpt.com' },
+  { id: 'leo',      name: 'Leo',                ai: 'Gemini',      icon: '◆', color: '#7C3AED', link: 'https://gemini.google.com' },
+  { id: 'juanz',    name: 'Juan Z',             ai: 'Copilot',     icon: '▲', color: '#0369A1', link: 'https://copilot.microsoft.com' },
+  { id: 'virginio', name: 'Virginio',           ai: 'Meta AI',     icon: '●', color: '#15803D', link: 'https://www.meta.ai' },
+  { id: 'eduardo',  name: 'Eduardo',            ai: 'Perplexity',  icon: '■', color: '#B45309', link: 'https://www.perplexity.ai' },
+  { id: 'eva',      name: 'Eva / Jovani Calvo', ai: 'Grok',        icon: '★', color: '#111827', link: 'https://grok.com' },
 ];
 
 // Prompt único de configuración (Paso 0). Igual para todas las IA.
