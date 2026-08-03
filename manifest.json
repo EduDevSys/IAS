@@ -1,0 +1,13 @@
+{
+  "name": "Flujo de Trabajo IA",
+  "short_name": "Flujo IA",
+  "description": "Sistema de apoyo para análisis de información con distintas IA.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#eef1f7",
+  "theme_color": "#4F46E5",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
