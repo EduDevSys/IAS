@@ -4,6 +4,8 @@
    ========================================================= */
 
 :root {
+  color-scheme: light;
+
   /* Color */
   --bg-0: #eef1f7;
   --bg-1: #e4e8f2;
@@ -34,6 +36,7 @@
 }
 
 html[data-theme="dark"] {
+  color-scheme: dark;
   --bg-0: #0b0d13;
   --bg-1: #12141c;
   --surface: rgba(255, 255, 255, 0.06);
@@ -145,7 +148,7 @@ button { font-family: inherit; }
 }
 
 .topbar-text { min-width: 0; }
-.topbar-text .name { font-weight: 650; font-size: 14px; line-height: 1.2; }
+.topbar-text .name { font-weight: 650; font-size: 14px; line-height: 1.2; color: var(--ink); }
 .topbar-text .ai { font-size: 12.5px; color: var(--ink-soft); }
 
 .topbar-actions { display: flex; align-items: center; gap: 8px; }
@@ -270,6 +273,7 @@ html[data-theme="dark"] .tab.active { background: var(--accent); color: var(--ac
   font-weight: 750;
   letter-spacing: -0.02em;
   margin: 6px 0 0;
+  color: var(--ink);
 }
 .splash p.sub {
   color: var(--ink-soft);
@@ -357,7 +361,7 @@ html[data-theme="dark"] .btn-primary { background: var(--accent); color: var(--a
 .member-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-2); }
 .member-card:active { transform: scale(0.98); }
 .member-card .avatar { width: 58px; height: 58px; font-size: 24px; }
-.member-card .m-name { font-weight: 700; font-size: 16px; }
+.member-card .m-name { font-weight: 700; font-size: 16px; color: var(--ink); }
 .member-card .m-ai {
   font-size: 13px;
   font-weight: 600;
@@ -396,6 +400,7 @@ html[data-theme="dark"] .btn-primary { background: var(--accent); color: var(--a
   font-weight: 750;
   letter-spacing: -0.01em;
   margin: 0 0 8px;
+  color: var(--ink);
 }
 .step-desc {
   color: var(--ink-soft);
