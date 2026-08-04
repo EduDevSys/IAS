@@ -16,16 +16,28 @@
 <div id="app" role="main"></div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<div id="aiModal" class="modal-overlay" hidden>
+<div id="stepModal" class="modal-overlay" hidden>
   <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <div class="modal-icon">✅</div>
-    <h3 id="modalTitle">Prompt copiado</h3>
-    <p id="modalText">Pégalo en tu IA y espera la respuesta.</p>
-    <div class="modal-actions">
-      <button class="btn btn-ghost btn-block" data-action="modal-close">Seguir aquí</button>
-      <button class="btn btn-primary btn-block" data-action="modal-go">Ir a la IA →</button>
+    <h3 id="modalTitle">¿En qué paso estás?</h3>
+    <p class="modal-sub">Elige por dónde continuar. Los pasos ya hechos se muestran en verde, solo son de consulta.</p>
+    <div class="step-options" id="stepOptions">
+      <button class="step-option" data-action="pick-step" data-step="0">
+        <span class="so-title">Paso 0</span>
+        <span class="so-desc">No he hecho nada, necesito configurar mi IA</span>
+      </button>
+      <button class="step-option" data-action="pick-step" data-step="1">
+        <span class="so-title">Paso 1</span>
+        <span class="so-desc">Ya hice el paso 0, debo contextualizar</span>
+      </button>
+      <button class="step-option" data-action="pick-step" data-step="2">
+        <span class="so-title">Paso 2</span>
+        <span class="so-desc">Ya tengo el link o los links de sitios web</span>
+      </button>
+      <button class="step-option" data-action="pick-step" data-step="3">
+        <span class="so-title">Paso 3</span>
+        <span class="so-desc">Ayuda a Eva</span>
+      </button>
     </div>
-    <p class="modal-remember">Recuerda regresar a esta pestaña para continuar con los demás prompts.</p>
   </div>
 </div>
 
