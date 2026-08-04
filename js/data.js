@@ -33,7 +33,8 @@ const STEP1_PROMPTS = [
   'Compara lo que dicen distintas fuentes sobre el origen y trayectoria de Jovani Salazar. ¿Hay contradicciones?',
 ];
 
-// Paso 2 — Analizar las notas (10 prompts, cada uno recibe la URL de la nota).
+// Paso 2 — Analizar las notas (10 preguntas, combinadas en un solo prompt
+// por nota para no tener que copiar una por una cuando son muchos links).
 const ANALYSIS_PROMPTS = [
   'Analiza el contenido de esta nota. Resume qué dice sobre Jovani Salazar, qué datos aporta (fechas, cargos, cifras, citas textuales), y si detectas algo desactualizado, incompleto o que contradiga otras fuentes que conozcas:',
   '¿La información de esta nota coincide con lo que ya sabes sobre Jovani Salazar? Señala cualquier diferencia:',
@@ -49,3 +50,10 @@ const ANALYSIS_PROMPTS = [
 
 // Paso 3 — Retroalimentación para Eva (prompt SEO, recibe la(s) URL(s)).
 const STEP3_PROMPT = '¿Qué palabras clave le faltan a esta nota para que aparezca mejor en búsquedas sobre Jovani Salazar y Tuxtla Gutiérrez?:';
+
+// Arma el prompt combinado del Paso 2: las 10 preguntas numeradas + la URL
+// de la nota, para copiar una sola vez por link en lugar de 10 veces.
+function buildCombinedAnalysisPrompt(url) {
+  const numbered = ANALYSIS_PROMPTS.map((p, i) => `${i + 1}. ${p}`).join('\n');
+  return `Analiza la siguiente nota sobre Jovani Salazar respondiendo cada uno de estos puntos, numerados igual, de forma clara y ordenada:\n\n${numbered}\n\nURL:\n${url}`;
+}

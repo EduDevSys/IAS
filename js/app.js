@@ -21,7 +21,7 @@
       screen: 'splash',       // splash | members | step0 | step1 | step2wait | step2paste | linklist | analysis | step3 | done
       memberId: null,
       step1Index: 0,
-      links: [],              // { url, analysisIndex, done }
+      links: [],              // { url, done }
       currentLinkIndex: 0,
       darkMode: false, // la app inicia siempre en modo claro por defecto
       soundOn: true,
@@ -209,7 +209,7 @@
   function computeProgress() {
     const fixedBefore = 1 /* step0 */ + STEP1_PROMPTS.length /* step1 */ + 2 /* step2wait + paste */;
     const linksCount = Math.max(state.links.length, 1);
-    const analysisTotal = linksCount * ANALYSIS_PROMPTS.length;
+    const analysisTotal = linksCount; // un paso combinado por link
     const total = fixedBefore + analysisTotal + 1 /* step3 */;
 
     let current = 0;
@@ -219,15 +219,12 @@
       case 'step2wait': current = fixedBefore - 1; break;
       case 'step2paste': current = fixedBefore; break;
       case 'linklist': {
-        const doneAnalysis = state.links.reduce((sum, l) => sum + Math.min(l.analysisIndex, ANALYSIS_PROMPTS.length), 0);
+        const doneAnalysis = state.links.filter((l) => l.done).length;
         current = fixedBefore + doneAnalysis;
         break;
       }
       case 'analysis': {
-        const priorLinksDone = state.currentLinkIndex * ANALYSIS_PROMPTS.length;
-        const link = state.links[state.currentLinkIndex];
-        const idx = link ? link.analysisIndex : 0;
-        current = fixedBefore + priorLinksDone + idx + 1;
+        current = fixedBefore + state.currentLinkIndex + 1;
         break;
       }
       case 'step3': current = total; break;
@@ -438,25 +435,21 @@
   }
 
   function renderLinkList() {
-    const items = state.links.map((l, i) => {
-      const doneCount = Math.min(l.analysisIndex, ANALYSIS_PROMPTS.length);
-      const done = doneCount >= ANALYSIS_PROMPTS.length;
-      return `
-        <button class="link-item ${done ? 'done' : ''}" data-action="open-link" data-index="${i}">
-          <span class="l-status">${done ? '✓' : i + 1}</span>
+    const items = state.links.map((l, i) => `
+        <button class="link-item ${l.done ? 'done' : ''}" data-action="open-link" data-index="${i}">
+          <span class="l-status">${l.done ? '✓' : i + 1}</span>
           <span class="l-url">${escapeHtml(l.url)}</span>
-          <span class="l-progress">${doneCount}/${ANALYSIS_PROMPTS.length}</span>
+          <span class="l-progress">${l.done ? 'Analizada' : 'Pendiente'}</span>
         </button>
-      `;
-    }).join('');
-    const allDone = state.links.length > 0 && state.links.every((l) => l.analysisIndex >= ANALYSIS_PROMPTS.length);
+      `).join('');
+    const allDone = state.links.length > 0 && state.links.every((l) => l.done);
     return `
       <div class="screen">
         <div class="wrap">
           <div class="card">
             <span class="eyebrow">Paso 2 · Análisis · ${state.links.length} nota(s)</span>
             <h2 class="step-title">Elige una nota para analizar</h2>
-            <p class="step-desc">Trabaja cada enlace con los 10 prompts de análisis. Puedes ir y volver entre notas cuando quieras.</p>
+            <p class="step-desc">Cada nota tiene un solo prompt combinado con las 10 preguntas de análisis. Puedes ir y volver entre notas cuando quieras.</p>
             <div class="link-list">${items}</div>
             <div class="btn-row">
               <button class="btn btn-ghost" data-action="add-more-links">+ Agregar más enlaces</button>
@@ -471,26 +464,23 @@
   function renderAnalysis() {
     const link = state.links[state.currentLinkIndex];
     if (!link) { state.screen = 'linklist'; save(); return renderLinkList(); }
-    const idx = link.analysisIndex;
-    const total = ANALYSIS_PROMPTS.length;
-    const promptText = ANALYSIS_PROMPTS[idx];
-    const fullText = `${promptText}\n\nURL:\n${link.url}`;
+    const fullText = buildCombinedAnalysisPrompt(link.url);
     return `
       <div class="screen">
         <div class="wrap">
           <div class="card">
-            <span class="eyebrow">Análisis (${idx + 1}/${total}) · Nota ${state.currentLinkIndex + 1}/${state.links.length}</span>
-            <h2 class="step-title">Prompt ${idx + 1}</h2>
+            <span class="eyebrow">Análisis combinado (10 preguntas) · Nota ${state.currentLinkIndex + 1}/${state.links.length}</span>
+            <h2 class="step-title">Prompt de análisis</h2>
             <p class="step-desc" style="word-break:break-all;">Nota: ${escapeHtml(link.url)}</p>
-            <textarea class="prompt-box" id="promptBox">${escapeHtml(fullText)}</textarea>
-            <p class="hint">Puedes editar el texto (por ejemplo, el dato específico del prompt 6) antes de copiar.</p>
+            <textarea class="prompt-box" id="promptBox" style="min-height:280px;">${escapeHtml(fullText)}</textarea>
+            <p class="hint">Puedes editar el texto (por ejemplo, el dato específico de la pregunta 6) antes de copiar.</p>
             <div class="copy-row">
               <button class="btn btn-primary" data-action="copy-box" data-target="promptBox">📋 Copiar</button>
             </div>
             ${navButtons({
-              backAction: idx === 0 ? 'back-to-linklist' : 'analysis-prev',
-              nextAction: idx === total - 1 ? 'analysis-finish-link' : 'analysis-next',
-              nextLabel: idx === total - 1 ? 'Terminar esta nota →' : 'Siguiente →',
+              backAction: 'back-to-linklist',
+              nextAction: 'analysis-finish-link',
+              nextLabel: link.done ? 'Volver a la lista →' : 'Marcar como analizada →',
             })}
           </div>
         </div>
@@ -642,7 +632,7 @@
           showToast('Pega al menos una URL para continuar.', '⚠️');
           return;
         }
-        const newLinks = urls.map((u) => ({ url: u, analysisIndex: 0, done: false }));
+        const newLinks = urls.map((u) => ({ url: u, done: false }));
         state.links = state.links.concat(newLinks);
         state.currentLinkIndex = state.links.length - newLinks.length;
         state.screen = state.links.length > 1 || newLinks.length > 1 ? 'linklist' : 'analysis';
@@ -659,19 +649,8 @@
       case 'go-linklist':
         state.screen = 'linklist';
         break;
-      case 'analysis-prev': {
-        const link = state.links[state.currentLinkIndex];
-        link.analysisIndex = Math.max(0, link.analysisIndex - 1);
-        break;
-      }
-      case 'analysis-next': {
-        const link = state.links[state.currentLinkIndex];
-        link.analysisIndex = Math.min(ANALYSIS_PROMPTS.length - 1, link.analysisIndex + 1);
-        break;
-      }
       case 'analysis-finish-link': {
         const link = state.links[state.currentLinkIndex];
-        link.analysisIndex = ANALYSIS_PROMPTS.length;
         link.done = true;
         state.screen = 'linklist';
         break;
