@@ -11,8 +11,7 @@
   const FLUJOIA_KEY = 'flujoia_state_v1';
   const root = document.getElementById('app');
   const toastEl = document.getElementById('toast');
-  const modalEl = document.getElementById('aiModal');
-  const modalTextEl = document.getElementById('modalText');
+  const stepModalEl = document.getElementById('stepModal');
 
   // -------------------------------------------------------
   // Estado
@@ -30,6 +29,8 @@
       timerStart: null,       // epoch ms cuando se reanudó
       timerElapsed: 0,        // ms acumulados mientras estaba pausado
       completed: { step0: false, step1: false }, // una vez marcados, esos pasos dejan de ser obligatorios
+      step3Url: '',
+      step3Generated: false,
     };
   }
 
@@ -140,32 +141,40 @@
   })();
 
   // -------------------------------------------------------
-  // Modal "Ir a la IA"
+  // Modal "¿En qué paso estás?"
   // -------------------------------------------------------
-  let modalTargetLink = null;
-
-  function openAiModal(member) {
-    if (!member) return;
-    modalTextEl.textContent = `Pégalo en ${member.ai} y espera la respuesta. Cuando termines, regresa a esta pestaña para continuar con los demás prompts.`;
-    modalTargetLink = member.link;
-    modalEl.hidden = false;
+  function openStepModal() {
+    const opt0 = stepModalEl.querySelector('[data-step="0"]');
+    const opt1 = stepModalEl.querySelector('[data-step="1"]');
+    opt0.classList.toggle('is-done', !!state.completed.step0);
+    opt1.classList.toggle('is-done', !!state.completed.step1);
+    const m = getMember();
+    stepModalEl.querySelector('#modalTitle').textContent = m ? `Hola ${m.name.split(' / ')[0]}, ¿en qué paso estás?` : '¿En qué paso estás?';
+    stepModalEl.hidden = false;
   }
 
-  function closeAiModal() {
-    modalEl.hidden = true;
-    modalTargetLink = null;
+  function closeStepModal() {
+    stepModalEl.hidden = true;
   }
 
-  modalEl.addEventListener('click', (e) => {
-    if (e.target === modalEl) { closeAiModal(); return; } // clic en el fondo
-    const el = e.target.closest('[data-action]');
+  stepModalEl.addEventListener('click', (e) => {
+    const el = e.target.closest('[data-action="pick-step"]');
     if (!el) return;
-    if (el.dataset.action === 'modal-close') {
-      closeAiModal();
-    } else if (el.dataset.action === 'modal-go') {
-      if (modalTargetLink) window.open(modalTargetLink, '_blank', 'noopener');
-      closeAiModal();
+    const step = el.dataset.step;
+    if (step === '0') {
+      state.screen = 'step0';
+    } else if (step === '1') {
+      state.screen = 'step1';
+      state.step1Index = 0;
+    } else if (step === '2') {
+      state.screen = state.links.length > 0 ? 'linklist' : 'step2wait';
+    } else if (step === '3') {
+      state.screen = 'step3';
     }
+    closeStepModal();
+    save();
+    render();
+    ensureTimerLoop();
   });
 
   async function copyText(text, btn) {
@@ -189,14 +198,6 @@
     if (ok) {
       playBlip();
       showToast('Copiado correctamente', '✅');
-      if (btn) {
-        const flag = btn.parentElement.querySelector('.copied-flag');
-        if (flag) {
-          flag.classList.add('show');
-          setTimeout(() => flag.classList.remove('show'), 1800);
-        }
-      }
-      openAiModal(getMember());
     } else {
       showToast('No se pudo copiar. Selecciona el texto manualmente.', '⚠️');
     }
@@ -367,7 +368,6 @@
             <textarea class="prompt-box" id="promptBox" readonly>${escapeHtml(STEP0_PROMPT)}</textarea>
             <div class="copy-row">
               <button class="btn btn-primary" data-action="copy-box" data-target="promptBox">📋 Copiar</button>
-              <span class="copied-flag">✅ Copiado correctamente</span>
             </div>
             ${navButtons({ backAction: 'go-members', nextAction: 'go-step1-start' })}
           </div>
@@ -391,7 +391,6 @@
             <textarea class="prompt-box" id="promptBox" readonly>${escapeHtml(text)}</textarea>
             <div class="copy-row">
               <button class="btn btn-primary" data-action="copy-box" data-target="promptBox">📋 Copiar</button>
-              <span class="copied-flag">✅ Copiado correctamente</span>
             </div>
             ${navButtons({
               backAction: idx === 0 ? 'go-step0' : 'step1-prev',
@@ -487,7 +486,6 @@
             <p class="hint">Puedes editar el texto (por ejemplo, el dato específico del prompt 6) antes de copiar.</p>
             <div class="copy-row">
               <button class="btn btn-primary" data-action="copy-box" data-target="promptBox">📋 Copiar</button>
-              <span class="copied-flag">✅ Copiado correctamente</span>
             </div>
             ${navButtons({
               backAction: idx === 0 ? 'back-to-linklist' : 'analysis-prev',
@@ -501,8 +499,9 @@
   }
 
   function renderStep3() {
-    const urls = state.links.map((l) => l.url).join('\n');
-    const fullText = `${STEP3_PROMPT}\n\nURL:\n${urls}`;
+    const fullText = state.step3Generated
+      ? `${STEP3_PROMPT}\n\nURL:\n${state.step3Url}`
+      : '';
     return `
       <div class="screen">
         <div class="wrap">
@@ -510,11 +509,16 @@
             <span class="eyebrow">Paso 3 · Retroalimentación para Eva</span>
             <h2 class="step-title">Prompt SEO</h2>
             <p class="step-desc">Copia este prompt para obtener palabras clave que ayuden a posicionar mejor las notas.</p>
-            <textarea class="prompt-box" id="promptBox">${escapeHtml(fullText)}</textarea>
+            <input type="url" class="big-input" id="step3UrlInput" placeholder="Pega aquí el link de la nota" style="min-height:auto; padding:14px 16px;" value="${escapeHtml(state.step3Url || '')}">
             <div class="copy-row">
-              <button class="btn btn-primary" data-action="copy-box" data-target="promptBox">📋 Copiar</button>
-              <span class="copied-flag">✅ Copiado correctamente</span>
+              <button class="btn btn-primary" data-action="generate-step3">Generar</button>
             </div>
+            ${state.step3Generated ? `
+              <textarea class="prompt-box" id="promptBox" style="margin-top:16px;">${escapeHtml(fullText)}</textarea>
+              <div class="copy-row">
+                <button class="btn btn-primary" data-action="copy-box" data-target="promptBox">📋 Copiar</button>
+              </div>
+            ` : ''}
             ${navButtons({ backAction: 'go-linklist', nextAction: 'finish-flow', nextLabel: 'Finalizar flujo →' })}
           </div>
         </div>
@@ -572,10 +576,11 @@
   // Acciones
   // -------------------------------------------------------
   function parseUrls(raw) {
-    return raw
-      .split(/[\n,]+/)
-      .map((s) => s.trim())
-      .filter(Boolean);
+    // Extrae solo lo que parezca una URL, sin importar qué otro texto
+    // venga pegado alrededor (mensajes, saludos, etc.).
+    const matches = raw.match(/(https?:\/\/[^\s,;]+)|(www\.[^\s,;]+)/gi) || [];
+    const cleaned = matches.map((u) => u.replace(/[),.;:'"!?]+$/g, ''));
+    return cleaned.filter((u, i) => cleaned.indexOf(u) === i);
   }
 
   function handleAction(action, el) {
@@ -586,14 +591,11 @@
       case 'select-member':
         state.memberId = el.dataset.id;
         state.timerStart = state.timerOn ? Date.now() : null;
-        // Si ya completó Paso 0 y Paso 1 antes, no lo obligamos a repetirlos:
-        // va directo a la parte activa del flujo (Paso 2 / Paso 3).
-        if (state.completed.step0 && state.completed.step1) {
-          state.screen = state.links.length > 0 ? 'linklist' : 'step2wait';
-        } else {
-          state.screen = 'step0';
-        }
-        break;
+        save();
+        render();
+        ensureTimerLoop();
+        openStepModal();
+        return;
       case 'go-members':
         state.screen = 'members';
         break;
@@ -677,6 +679,19 @@
       case 'go-step3':
         state.screen = 'step3';
         break;
+      case 'generate-step3': {
+        const input = document.getElementById('step3UrlInput');
+        const raw = input ? input.value.trim() : '';
+        const found = parseUrls(raw);
+        const url = found[0] || raw;
+        if (!url) {
+          showToast('Pega el link de la nota para generar el prompt.', '⚠️');
+          return;
+        }
+        state.step3Url = url;
+        state.step3Generated = true;
+        break;
+      }
       case 'finish-flow':
         state.screen = 'done';
         break;

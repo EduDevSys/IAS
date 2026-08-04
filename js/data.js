@@ -16,7 +16,7 @@ const MEMBERS = [
   { id: 'juanz',    name: 'Juan Z',             ai: 'Copilot',     icon: '▲', color: '#0369A1', link: 'https://copilot.microsoft.com' },
   { id: 'virginio', name: 'Virginio',           ai: 'Meta AI',     icon: '●', color: '#15803D', link: 'https://www.meta.ai' },
   { id: 'eduardo',  name: 'Eduardo',            ai: 'Perplexity',  icon: '■', color: '#B45309', link: 'https://www.perplexity.ai' },
-  { id: 'eva',      name: 'Eva / Jovani Calvo', ai: 'Grok',        icon: '★', color: '#111827', link: 'https://grok.com' },
+  { id: 'eva',      name: 'Eva / Jovani Calvo / Jacky', ai: 'Grok',        icon: '★', color: '#111827', link: 'https://grok.com' },
 ];
 
 // Prompt único de configuración (Paso 0). Igual para todas las IA.
@@ -25,7 +25,7 @@ const STEP0_PROMPT = `Actúa como un analista imparcial. Distingue claramente en
 // Paso 1 — Contextualizar la IA (7 prompts, sin URL).
 const STEP1_PROMPTS = [
   '¿Quién es Jovani Salazar, funcionario público en Chiapas, México? ¿Qué cargo ocupa actualmente y qué proyectos ha impulsado? Da fuentes si las tienes.',
-  '¿Qué información encuentras sobre [Jovani Salazar / tema específico] en [nombre del medio o sitio]? Indica fecha de publicación y si hay datos que puedan estar desactualizados o ser inexactos.',
+  '¿Qué información encuentras sobre Jovani Salazar en sitios web que no sean redes sociales? Indica fecha de publicación y si hay datos que puedan estar desactualizados o ser inexactos.',
   '¿Qué información tienes sobre los posibles candidatos a la alcaldía de Tuxtla Gutiérrez para 2027, incluyendo a Jovani Salazar?',
   '¿Existen notas o menciones críticas sobre Jovani Salazar en medios de Chiapas? Resume el contexto.',
   '¿La información que tienes sobre Jovani Salazar está actualizada a este año? ¿Cuál es la fuente más reciente que conoces?',
