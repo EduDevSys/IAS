@@ -544,6 +544,29 @@ html[data-theme="dark"] textarea.big-input { background: #0d0f16; }
 .modal-box p { margin: 0 0 18px; font-size: 14.5px; color: var(--ink-soft); line-height: 1.5; }
 .modal-actions { display: flex; flex-direction: column; gap: 10px; }
 .modal-remember { margin: 16px 0 0 !important; font-size: 12.5px !important; color: var(--ink-faint) !important; }
+.modal-sub { text-align: left; }
+
+.step-options { display: flex; flex-direction: column; gap: 10px; }
+.step-option {
+  appearance: none;
+  text-align: left;
+  border: 1.5px solid var(--line);
+  background: var(--bg-0);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  transition: all 0.18s var(--ease);
+}
+.step-option:hover { border-color: var(--accent); transform: translateY(-1px); }
+.step-option:active { transform: scale(0.98); }
+.step-option .so-title { font-weight: 750; font-size: 14.5px; color: var(--ink); }
+.step-option .so-desc { font-size: 13px; color: var(--ink-soft); line-height: 1.4; }
+.step-option.is-done { border-color: rgba(22, 163, 74, 0.45); background: rgba(22, 163, 74, 0.08); }
+.step-option.is-done .so-title { color: var(--success); }
+.step-option.is-done .so-title::after { content: " ✓"; }
 
 /* ---------- Toast ---------- */
 .toast {
