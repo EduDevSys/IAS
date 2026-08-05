@@ -468,16 +468,28 @@ html[data-theme="dark"] textarea.big-input { background: #0d0f16; }
 .link-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
+  gap: 8px;
   border-radius: var(--r-md);
   border: 1px solid var(--line);
   background: var(--bg-0);
-  cursor: pointer;
-  text-align: left;
 }
 .link-item:hover { border-color: var(--member-color); }
-.link-item.active { border-color: var(--member-color); background: var(--accent-soft); }
+.link-item.done { border-color: rgba(22, 163, 74, 0.4); }
+.link-item .l-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 8px 14px 16px;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+.link-item.done .l-main { background: var(--accent-soft); border-radius: var(--r-md) 0 0 var(--r-md); }
 .link-item .l-status {
   width: 26px; height: 26px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
@@ -490,6 +502,23 @@ html[data-theme="dark"] textarea.big-input { background: #0d0f16; }
   white-space: nowrap; font-size: 13.5px; color: var(--ink-soft);
 }
 .link-item .l-progress { font-size: 12px; color: var(--ink-faint); flex-shrink: 0; }
+.link-item .l-delete {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  margin-right: 8px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--surface-solid);
+  color: var(--ink-faint);
+  cursor: pointer;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s var(--ease);
+}
+.link-item .l-delete:hover { background: var(--danger); border-color: var(--danger); color: #fff; }
 
 /* ---------- Splash de espera ---------- */
 .wait-screen {
@@ -512,6 +541,41 @@ html[data-theme="dark"] textarea.big-input { background: #0d0f16; }
   0% { transform: scale(0.85); opacity: 0.9; }
   100% { transform: scale(1.35); opacity: 0; }
 }
+
+/* ---------- Botones flotantes globales ---------- */
+.global-actions {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 150;
+  display: flex;
+  gap: 10px;
+  padding: 12px max(12px, env(safe-area-inset-left)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-right));
+  background: var(--surface);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border-top: 1px solid var(--line);
+}
+.ga-btn {
+  flex: 1;
+  appearance: none;
+  border: 1px solid var(--line);
+  background: var(--surface-solid);
+  color: var(--ink);
+  font-weight: 650;
+  font-size: 13.5px;
+  padding: 12px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: var(--shadow-1);
+  transition: transform 0.15s var(--ease), box-shadow 0.2s var(--ease);
+}
+.ga-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-2); }
+.ga-btn:active { transform: scale(0.97); }
+
+/* Deja espacio abajo para que el contenido no quede tapado por la barra flotante */
+#app { padding-bottom: 78px; }
 
 /* ---------- Modal "Ir a la IA" ---------- */
 .modal-overlay {
