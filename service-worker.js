@@ -1,5 +1,8 @@
-// service-worker.js — caché mínima para uso 100% sin internet tras la primera carga.
-const CACHE = 'flujoia-cache-v1';
+// service-worker.js — "red primero, caché como respaldo".
+// Así, cuando el equipo tiene internet, siempre recibe la versión más
+// nueva del sitio sin tener que borrar caché a mano. Si no hay internet,
+// se sirve la última copia guardada.
+const CACHE = 'flujoia-cache-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -29,17 +32,12 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      return (
-        cached ||
-        fetch(event.request)
-          .then((resp) => {
-            const copy = resp.clone();
-            caches.open(CACHE).then((cache) => cache.put(event.request, copy));
-            return resp;
-          })
-          .catch(() => cached)
-      );
-    })
+    fetch(event.request)
+      .then((resp) => {
+        const copy = resp.clone();
+        caches.open(CACHE).then((cache) => cache.put(event.request, copy));
+        return resp;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
