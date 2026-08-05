@@ -58,15 +58,56 @@ function buildCombinedAnalysisPrompt(url) {
   return `Analiza la siguiente nota sobre Jovani Salazar respondiendo cada uno de estos puntos, numerados igual, de forma clara y ordenada:\n\n${numbered}\n\nURL:\n${url}`;
 }
 
-// Prompt maestro: informe de inteligencia política (botón flotante, siempre disponible).
-const MASTER_PROMPT = `Redacta un informe de inteligencia política sobre Jovani Salazar en Tuxtla Gutiérrez, con lectura positiva pero crítica. Incluye contexto, fortalezas, narrativa pública, bases de apoyo, señales de crecimiento, comparación con:
-Guillermo Santiago
-Maria Mandiola
-Francisco Chacón
-Llaven Abarca
-Carlos Morales
-y escenarios probables.
-Evita adjetivos excesivos y separa evidencia de interpretación.`;
+// Prompt maestro: análisis comparativo FODA (botón flotante, siempre disponible).
+const MASTER_PROMPT = `Redacta un análisis comparativo de perfiles políticos en Tuxtla Gutiérrez con enfoque FODA entre los siguientes nombres:
+
+* Jovani Salazar
+* Guillermo Santiago
+* Maria Mandiola
+* Francisco Chacón
+* Llaven Abarca
+* Carlos Morales
+
+Quiero que el análisis incluya:
+
+1. Comparación general de cada perfil político:
+   * trayectoria
+   * posicionamiento público
+   * bases de apoyo
+   * narrativa pública
+   * nivel de visibilidad
+   * viabilidad política rumbo a Tuxtla Gutiérrez
+2. FODA individual para cada perfil, con:
+   * Fortalezas
+   * Oportunidades
+   * Debilidades
+   * Amenazas
+3. Comparación cruzada entre ellos, señalando:
+   * quién tiene mejor estructura
+   * quién tiene mejor narrativa
+   * quién tiene más desgaste
+   * quién tiene mayor crecimiento potencial
+   * quién enfrenta más riesgos políticos
+4. Lectura crítica y equilibrada:
+   * no usar adjetivos excesivos
+   * separar evidencia de interpretación
+   * señalar contradicciones, límites, riesgos y ventajas de cada perfil
+5. Escenarios probables:
+   * quién podría crecer
+   * quién podría estancarse
+   * quién tiene más posibilidades de consolidarse
+   * quién depende más de coyuntura o respaldo externo
+6. Formato sugerido:
+   * un apartado por personaje
+   * una tabla comparativa final
+   * un cierre con conclusión estratégica
+
+Importante:
+
+* Mantén un tono analítico, político y crítico.
+* No hagas propaganda ni elogios vacíos.
+* Si hay poca evidencia para algún perfil, dilo con claridad.
+* Diferencia entre hechos observables e interpretación política.`;
 
 // Prompt para generar la infografía (botón flotante, siempre disponible).
 // La "X" es intencional: el usuario la reemplaza por la fuente/IA que usó antes de copiar.
