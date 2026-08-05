@@ -191,10 +191,21 @@
         document.getElementById('masterPromptBox').value = MASTER_PROMPT;
         masterModalEl.hidden = false;
       } else if (el.dataset.action === 'open-image-modal') {
-        document.getElementById('imagePromptBox').value = IMAGE_PROMPT;
-        imageModalEl.hidden = false;
+        openImageModal();
       }
     });
+  }
+
+  function openImageModal() {
+    const select = document.getElementById('imageAiSelect');
+    if (select && !select.dataset.populated) {
+      select.innerHTML = MEMBERS.map((m) => `<option value="${escapeHtml(m.ai)}">${escapeHtml(m.ai)}</option>`).join('');
+      select.dataset.populated = '1';
+    }
+    const member = getMember();
+    if (select && member) select.value = member.ai;
+    document.getElementById('imageResultWrap').hidden = true;
+    imageModalEl.hidden = false;
   }
 
   [masterModalEl, imageModalEl].forEach((modalNode) => {
@@ -208,6 +219,12 @@
       } else if (el.dataset.action === 'copy-box') {
         const target = document.getElementById(el.dataset.target);
         if (target) copyText(target.value, el);
+      } else if (el.dataset.action === 'generate-image-prompt') {
+        const select = document.getElementById('imageAiSelect');
+        const aiName = select ? select.value : '';
+        const promptBox = document.getElementById('imagePromptBox');
+        promptBox.value = IMAGE_PROMPT.replace('X', aiName);
+        document.getElementById('imageResultWrap').hidden = false;
       }
     });
   });
