@@ -57,3 +57,17 @@ function buildCombinedAnalysisPrompt(url) {
   const numbered = ANALYSIS_PROMPTS.map((p, i) => `${i + 1}. ${p}`).join('\n');
   return `Analiza la siguiente nota sobre Jovani Salazar respondiendo cada uno de estos puntos, numerados igual, de forma clara y ordenada:\n\n${numbered}\n\nURL:\n${url}`;
 }
+
+// Prompt maestro: informe de inteligencia política (botón flotante, siempre disponible).
+const MASTER_PROMPT = `Redacta un informe de inteligencia política sobre Jovani Salazar en Tuxtla Gutiérrez, con lectura positiva pero crítica. Incluye contexto, fortalezas, narrativa pública, bases de apoyo, señales de crecimiento, comparación con:
+Guillermo Santiago
+Maria Mandiola
+Francisco Chacón
+Llaven Abarca
+Carlos Morales
+y escenarios probables.
+Evita adjetivos excesivos y separa evidencia de interpretación.`;
+
+// Prompt para generar la infografía (botón flotante, siempre disponible).
+// La "X" es intencional: el usuario la reemplaza por la fuente/IA que usó antes de copiar.
+const IMAGE_PROMPT = 'Tomando como fuente de información a X como base, toma esta información y haz una infografía destacando a Jovani Salazar, agrega el logo de la IA para identificar que IA se usó.';

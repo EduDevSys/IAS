@@ -12,6 +12,9 @@
   const root = document.getElementById('app');
   const toastEl = document.getElementById('toast');
   const stepModalEl = document.getElementById('stepModal');
+  const masterModalEl = document.getElementById('masterModal');
+  const imageModalEl = document.getElementById('imageModal');
+  const globalActionsEl = document.querySelector('.global-actions');
 
   // -------------------------------------------------------
   // Estado
@@ -177,6 +180,38 @@
     ensureTimerLoop();
   });
 
+  // -------------------------------------------------------
+  // Botones flotantes globales: Prompt maestro / Generar imagen
+  // -------------------------------------------------------
+  if (globalActionsEl) {
+    globalActionsEl.addEventListener('click', (e) => {
+      const el = e.target.closest('[data-action]');
+      if (!el) return;
+      if (el.dataset.action === 'open-master-modal') {
+        document.getElementById('masterPromptBox').value = MASTER_PROMPT;
+        masterModalEl.hidden = false;
+      } else if (el.dataset.action === 'open-image-modal') {
+        document.getElementById('imagePromptBox').value = IMAGE_PROMPT;
+        imageModalEl.hidden = false;
+      }
+    });
+  }
+
+  [masterModalEl, imageModalEl].forEach((modalNode) => {
+    if (!modalNode) return;
+    modalNode.addEventListener('click', (e) => {
+      if (e.target === modalNode) { modalNode.hidden = true; return; } // clic en el fondo
+      const el = e.target.closest('[data-action]');
+      if (!el) return;
+      if (el.dataset.action === 'close-generic-modal') {
+        modalNode.hidden = true;
+      } else if (el.dataset.action === 'copy-box') {
+        const target = document.getElementById(el.dataset.target);
+        if (target) copyText(target.value, el);
+      }
+    });
+  });
+
   async function copyText(text, btn) {
     let ok = false;
     try {
@@ -318,6 +353,10 @@
     }
     root.innerHTML = html;
     if (state.screen === 'done') launchConfetti();
+    if (state.screen === 'linklist') {
+      const target = root.querySelector(`.l-main[data-index="${state.currentLinkIndex}"]`);
+      if (target) target.scrollIntoView({ block: 'center', behavior: 'auto' });
+    }
   }
 
   function renderSplash() {
@@ -436,11 +475,14 @@
 
   function renderLinkList() {
     const items = state.links.map((l, i) => `
-        <button class="link-item ${l.done ? 'done' : ''}" data-action="open-link" data-index="${i}">
-          <span class="l-status">${l.done ? '✓' : i + 1}</span>
-          <span class="l-url">${escapeHtml(l.url)}</span>
-          <span class="l-progress">${l.done ? 'Analizada' : 'Pendiente'}</span>
-        </button>
+        <div class="link-item ${l.done ? 'done' : ''}">
+          <button class="l-main" data-action="open-link" data-index="${i}">
+            <span class="l-status">${l.done ? '✓' : i + 1}</span>
+            <span class="l-url">${escapeHtml(l.url)}</span>
+            <span class="l-progress">${l.done ? 'Analizada' : 'Pendiente'}</span>
+          </button>
+          <button class="l-delete" data-action="delete-link" data-index="${i}" title="Eliminar nota" aria-label="Eliminar nota">✕</button>
+        </div>
       `).join('');
     const allDone = state.links.length > 0 && state.links.every((l) => l.done);
     return `
@@ -477,11 +519,10 @@
             <div class="copy-row">
               <button class="btn btn-primary" data-action="copy-box" data-target="promptBox">📋 Copiar</button>
             </div>
-            ${navButtons({
-              backAction: 'back-to-linklist',
-              nextAction: 'analysis-finish-link',
-              nextLabel: link.done ? 'Volver a la lista →' : 'Marcar como analizada →',
-            })}
+            <div class="btn-row">
+              <button class="btn btn-ghost" data-action="back-to-linklist">← Lista</button>
+              <button class="btn btn-primary" data-action="analysis-next-note">Siguiente →</button>
+            </div>
           </div>
         </div>
       </div>
@@ -649,10 +690,25 @@
       case 'go-linklist':
         state.screen = 'linklist';
         break;
-      case 'analysis-finish-link': {
+      case 'analysis-next-note': {
         const link = state.links[state.currentLinkIndex];
         link.done = true;
-        state.screen = 'linklist';
+        const nextIdx = state.currentLinkIndex + 1;
+        if (nextIdx < state.links.length) {
+          state.currentLinkIndex = nextIdx;
+          state.screen = 'analysis';
+        } else {
+          state.screen = 'linklist';
+        }
+        break;
+      }
+      case 'delete-link': {
+        const idx = parseInt(el.dataset.index, 10);
+        if (!window.confirm('¿Eliminar esta nota de la lista? No se puede deshacer.')) return;
+        state.links.splice(idx, 1);
+        if (state.currentLinkIndex >= state.links.length) {
+          state.currentLinkIndex = Math.max(0, state.links.length - 1);
+        }
         break;
       }
       case 'go-step3':
